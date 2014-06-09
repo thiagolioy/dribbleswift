@@ -11,7 +11,7 @@ import UIKit
 class ShotTableViewCell: UITableViewCell {
     
     @IBOutlet
-    var shotImage:UIImageView?
+    var shotImage:UIImageView
     @IBOutlet
     var shotTitle:UILabel
     
