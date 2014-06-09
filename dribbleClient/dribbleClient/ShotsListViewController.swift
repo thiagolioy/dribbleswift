@@ -43,40 +43,34 @@ class ShotsListViewController: UIViewController,UITableViewDataSource,UITableVie
         cell.shotImage.setImageWithURL(NSURL(string: shot.imageUrl))
         return cell
     }
-    
-        func getJSON(urlToRequest: String) -> NSData{
-    return NSData(contentsOfURL: NSURL(string: urlToRequest))
-}
-    func parseJSON(inputData: NSData) -> NSDictionary{
-        var error: NSError?
-        var boardsDictionary: NSDictionary = NSJSONSerialization.JSONObjectWithData(inputData, options: NSJSONReadingOptions.MutableContainers, error: &error) as NSDictionary
-        
-        return boardsDictionary
-    }
 
     
     func fetchShots(listType:String = "popular"){
         
-        let title = "title"
-        let url = "https://d13yacurqjgara.cloudfront.net/users/238469/screenshots/1587373/linkedin_1x.png"
-        shots += Shot(title:title,imageUrl:url)
-        shots += Shot(title:title,imageUrl:url)
-        updateTableView(shots)
+        let baseUrl = NSURL(string: "http://api.dribbble.com/")
+        let manager = AFHTTPRequestOperationManager(baseURL: baseUrl)
+        let queryUrl = "shots/\(listType)"
         
-//        let baseUrl = NSURL(string: "http://api.dribbble.com/shots/\(listType)")
-//        let manager = AFHTTPRequestOperationManager(baseURL: baseUrl)
-//        let queryUrl = "shots/\(listType)"
-//        
-//        func successBlock(operation: AFHTTPRequestOperation!, responseObject: AnyObject!) {
-//         
-//              updateTableView(shots)
-//        }
-//        
-//        func errorBlock(operation: AFHTTPRequestOperation!, error:NSError!) {
-//            
-//        }
-//        
-//        manager.GET(queryUrl, parameters: nil, success:successBlock , failure:errorBlock)
+        func successBlock(operation: AFHTTPRequestOperation!, responseObject: AnyObject!) {
+                if let response = responseObject as? NSDictionary{
+                    let results = response["shots"] as NSArray
+                    for s : AnyObject in results{
+                        if let dict = s as? NSDictionary{
+                            let shot = Shot()
+                            shot.parse(dict)
+                            shots += shot
+                        }
+                        
+                    }
+                    updateTableView(shots)
+                }
+        }
+        
+        func errorBlock(operation: AFHTTPRequestOperation!, error:NSError!) {
+            
+        }
+        
+        manager.GET(queryUrl, parameters: nil, success:successBlock , failure:errorBlock)
       }
 
 }
